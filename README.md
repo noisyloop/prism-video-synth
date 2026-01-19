@@ -2,7 +2,7 @@
 
 A mobile-friendly WebGL visual synthesizer with 40+ shader effects, layer blending, and high-resolution export.
 
-![PRISM Screenshot](screenshot.png)
+![PRISM Screenshot]
 
 ## Features
 
