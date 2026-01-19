@@ -2,8 +2,6 @@
 
 A mobile-friendly WebGL visual synthesizer with 40+ shader effects, layer blending, and high-resolution export.
 
-![PRISM Screenshot]
-
 ## Features
 
 - **40+ Base Visuals** across categories: Organic, Geometric, Retro, Space, Nature, Psychedelic, Cyber, Audio, Fractal, Energy
