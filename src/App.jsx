@@ -63,7 +63,10 @@ export default function VisualSynthesizer() {
   const programsRef = useRef({});
   const animationRef = useRef(null);
   const startTimeRef = useRef(Date.now());
-  
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+  const recordingStartTimeRef = useRef(null);
+
   const [layers, setLayers] = useState([{ id: 1, shaderIndex: 0, opacity: 1, blendMode: 'add', speed: 0.5, scale: 1, intensity: 1, visible: true }]);
   const [selectedLayer, setSelectedLayer] = useState(0);
   const [showControls, setShowControls] = useState(true);
@@ -73,6 +76,9 @@ export default function VisualSynthesizer() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [showResolutionPicker, setShowResolutionPicker] = useState(false);
   const [filterCategory, setFilterCategory] = useState('all');
+  const [isRecording, setIsRecording] = useState(false);
+  const [videoDuration, setVideoDuration] = useState(5);
+  const [showVideoDurationPicker, setShowVideoDurationPicker] = useState(false);
 
   const categories = ['all', ...new Set(SHADERS.map(s => s.category))];
 
@@ -272,6 +278,68 @@ export default function VisualSynthesizer() {
     }
   }, [layers, resolution, createProgram]);
 
+  const startRecording = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    try {
+      const stream = canvas.captureStream(30); // 30 FPS
+      const options = {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 8000000 // 8 Mbps for high quality
+      };
+
+      // Fallback to vp8 if vp9 not supported
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options.mimeType = 'video/webm;codecs=vp8';
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = mediaRecorder;
+      recordedChunksRef.current = [];
+      recordingStartTimeRef.current = Date.now();
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `prism-video-${Date.now()}.webm`;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        setIsRecording(false);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+
+      // Auto-stop after selected duration
+      setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          stopRecording();
+        }
+      }, videoDuration * 1000);
+
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      alert('Failed to start video recording. Please try again.');
+    }
+  }, [videoDuration]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+  }, []);
+
   const addLayer = () => {
     const newId = Math.max(...layers.map(l => l.id)) + 1;
     setLayers([...layers, { id: newId, shaderIndex: Math.floor(Math.random() * SHADERS.length), opacity: 0.7, blendMode: 'add', speed: 0.5, scale: 1, intensity: 1, visible: true }]);
@@ -304,6 +372,7 @@ export default function VisualSynthesizer() {
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setIsPlaying(!isPlaying)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>{isPlaying ? '⏸' : '▶'}</button>
           <button onClick={saveImage} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>📷</button>
+          <button onClick={() => isRecording ? stopRecording() : setShowVideoDurationPicker(true)} style={{ background: isRecording ? 'rgba(255,100,100,0.3)' : 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>{isRecording ? '⏹' : '🎥'}</button>
           <button onClick={() => setShowResolutionPicker(true)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>{resolution.name}</button>
         </div>
       </div>
@@ -402,6 +471,24 @@ export default function VisualSynthesizer() {
             </div>
             <button onClick={saveHiRes} style={{ width: '100%', background: 'linear-gradient(135deg, #6cf, #c6f)', border: 'none', borderRadius: 8, padding: 14, color: '#000', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>Save {resolution.name} Image</button>
             <button onClick={() => setShowResolutionPicker(false)} style={{ width: '100%', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 8, padding: 12, color: '#fff', fontSize: 12, cursor: 'pointer', marginTop: 8 }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Video Duration Picker Modal */}
+      {showVideoDurationPicker && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 16, padding: 24, maxWidth: 320 }}>
+            <div style={{ color: '#fff', fontSize: 16, fontWeight: 600, marginBottom: 16, textAlign: 'center' }}>Video Duration</div>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {[3, 5, 10, 15, 30, 60].map(duration => (
+                <button key={duration} onClick={() => { setVideoDuration(duration); }} style={{ background: videoDuration === duration ? 'rgba(100,200,255,0.3)' : 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 8, padding: '12px 16px', color: '#fff', cursor: 'pointer', textAlign: 'left' }}>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>{duration} seconds</div>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => { startRecording(); setShowVideoDurationPicker(false); }} style={{ width: '100%', background: 'linear-gradient(135deg, #f66, #f96)', border: 'none', borderRadius: 8, padding: 14, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>🎥 Start Recording ({videoDuration}s)</button>
+            <button onClick={() => setShowVideoDurationPicker(false)} style={{ width: '100%', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 8, padding: 12, color: '#fff', fontSize: 12, cursor: 'pointer', marginTop: 8 }}>Cancel</button>
           </div>
         </div>
       )}
