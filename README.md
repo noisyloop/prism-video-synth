@@ -1,15 +1,17 @@
 # PRISM — Visual Synthesizer
 
-A mobile-friendly WebGL visual synthesizer with 40+ shader effects, layer blending, and high-resolution export.
+A mobile-friendly WebGL visual synthesizer with 46 shader effects, layer blending, video recording, and instant randomization for creative exploration.
 
 ## Features
 
-- **40+ Base Visuals** across categories: Organic, Geometric, Retro, Space, Nature, Psychedelic, Cyber, Audio, Fractal, Energy
+- **46 Unique Shaders** across 12 categories: Organic, Geometric, Retro, Space, Nature, Psychedelic, Cyber, Light, Audio, Fractal, Energy, Glitch
 - **Layer System** — Stack multiple visuals with blend modes (add, multiply, screen, normal)
 - **Per-Layer Controls** — Opacity, speed, scale, intensity
-- **Resolution Export** — Save images at 720p, 1080p, 1440p, 4K, Square (1080×1080), or Portrait (1080×1920)
+- **🎲 Randomizer** — Instant visualization with randomized shaders and parameters for creative exploration
+- **🎥 Video Recording** — Record 3-60 second videos at 30 FPS in WebM format
+- **📷 Image Export** — Save high-resolution images at 720p, 1080p, 1440p, 4K, Square (1080×1080), or Portrait (1080×1920)
 - **Mobile-First UI** — Collapsible controls keep visuals unobstructed
-- **Real-time Performance** — Optimized WebGL rendering
+- **Real-time Performance** — Optimized WebGL rendering at 60 FPS
 
 ## Quick Start
 
@@ -20,14 +22,25 @@ npm run dev
 
 ## Usage
 
-- **📷 Button** — Quick save current frame
-- **Resolution Button** — Open export settings, choose resolution, save hi-res image
+### Top Bar Controls
 - **⏸/▶ Button** — Pause/play animation
-- **▲/▼ Button** — Toggle controls visibility
-- **+ ADD** — Add a new layer
-- **Shader Dropdown** — Pick from 40+ visuals with category filter
+- **🎲 Button** — Randomize all layers instantly (shader, parameters, blend modes)
+- **📷 Button** — Quick save current frame at display resolution
+- **🎥 Button** — Open video duration picker and record (3, 5, 10, 15, 30, or 60 seconds)
+- **Resolution Button** — Open export settings, choose resolution (720p-4K), save hi-res image
+
+### Layer Controls
+- **Layer Tabs** — Switch between layers (shows shader name)
+- **+ ADD** — Add a new randomized layer
+- **Shader Dropdown** — Pick from 46 visuals with category filter
+- **🎲 Button** — Randomize current layer only
+- **👁 Button** — Toggle layer visibility
+- **✕ Button** — Delete current layer (only if multiple layers exist)
 - **Sliders** — Adjust opacity, speed, scale, intensity per layer
-- **Blend Mode Buttons** — Change how layers combine
+- **Blend Mode Buttons** — Choose from add, multiply, screen, or normal
+
+### Other Controls
+- **▲/▼ Button** — Toggle controls visibility for clean viewing
 
 ## Tech Stack
 
