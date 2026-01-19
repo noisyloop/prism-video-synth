@@ -340,6 +340,37 @@ export default function VisualSynthesizer() {
     }
   }, []);
 
+  const randomizeLayer = useCallback((index) => {
+    const randomShader = Math.floor(Math.random() * SHADERS.length);
+    const randomOpacity = 0.3 + Math.random() * 0.7; // 0.3 to 1.0
+    const randomSpeed = 0.1 + Math.random() * 1.9; // 0.1 to 2.0
+    const randomScale = 0.3 + Math.random() * 2.2; // 0.3 to 2.5
+    const randomIntensity = 0.5 + Math.random() * 1.5; // 0.5 to 2.0
+    const randomBlendMode = BLEND_MODES[Math.floor(Math.random() * BLEND_MODES.length)];
+
+    updateLayer(index, {
+      shaderIndex: randomShader,
+      opacity: randomOpacity,
+      speed: randomSpeed,
+      scale: randomScale,
+      intensity: randomIntensity,
+      blendMode: randomBlendMode
+    });
+  }, []);
+
+  const randomizeAllLayers = useCallback(() => {
+    const newLayers = layers.map(layer => ({
+      ...layer,
+      shaderIndex: Math.floor(Math.random() * SHADERS.length),
+      opacity: 0.3 + Math.random() * 0.7,
+      speed: 0.1 + Math.random() * 1.9,
+      scale: 0.3 + Math.random() * 2.2,
+      intensity: 0.5 + Math.random() * 1.5,
+      blendMode: BLEND_MODES[Math.floor(Math.random() * BLEND_MODES.length)]
+    }));
+    setLayers(newLayers);
+  }, [layers]);
+
   const addLayer = () => {
     const newId = Math.max(...layers.map(l => l.id)) + 1;
     setLayers([...layers, { id: newId, shaderIndex: Math.floor(Math.random() * SHADERS.length), opacity: 0.7, blendMode: 'add', speed: 0.5, scale: 1, intensity: 1, visible: true }]);
@@ -371,6 +402,7 @@ export default function VisualSynthesizer() {
         <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, letterSpacing: 1 }}>PRISM</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setIsPlaying(!isPlaying)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>{isPlaying ? '⏸' : '▶'}</button>
+          <button onClick={randomizeAllLayers} style={{ background: 'rgba(255,200,100,0.2)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#ffa', fontSize: 12, cursor: 'pointer' }}>🎲</button>
           <button onClick={saveImage} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>📷</button>
           <button onClick={() => isRecording ? stopRecording() : setShowVideoDurationPicker(true)} style={{ background: isRecording ? 'rgba(255,100,100,0.3)' : 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>{isRecording ? '⏹' : '🎥'}</button>
           <button onClick={() => setShowResolutionPicker(true)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>{resolution.name}</button>
@@ -396,7 +428,8 @@ export default function VisualSynthesizer() {
             <button onClick={() => setShowShaderPicker(true)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '10px 16px', color: '#fff', fontSize: 13, cursor: 'pointer', flex: 1, marginRight: 8, textAlign: 'left' }}>
               {SHADERS[currentLayer.shaderIndex].name} ▼
             </button>
-            <button onClick={() => updateLayer(selectedLayer, { visible: !currentLayer.visible })} style={{ background: currentLayer.visible ? 'rgba(100,255,100,0.2)' : 'rgba(255,100,100,0.2)', border: 'none', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>{currentLayer.visible ? '👁' : '👁‍🗨'}</button>
+            <button onClick={() => randomizeLayer(selectedLayer)} style={{ background: 'rgba(255,200,100,0.2)', border: 'none', borderRadius: 8, padding: '10px 12px', color: '#ffa', fontSize: 12, cursor: 'pointer', marginLeft: 8 }}>🎲</button>
+            <button onClick={() => updateLayer(selectedLayer, { visible: !currentLayer.visible })} style={{ background: currentLayer.visible ? 'rgba(100,255,100,0.2)' : 'rgba(255,100,100,0.2)', border: 'none', borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12, cursor: 'pointer', marginLeft: 8 }}>{currentLayer.visible ? '👁' : '👁‍🗨'}</button>
             {layers.length > 1 && <button onClick={() => removeLayer(selectedLayer)} style={{ background: 'rgba(255,100,100,0.2)', border: 'none', borderRadius: 8, padding: '10px 12px', color: '#f66', fontSize: 12, cursor: 'pointer', marginLeft: 8 }}>✕</button>}
           </div>
 
