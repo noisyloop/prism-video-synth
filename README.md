@@ -1,14 +1,14 @@
 # PRISM — Visual Synthesizer
 
-A mobile-friendly WebGL visual synthesizer with 46 shader effects, layer blending, video recording, and instant randomization for creative exploration.
+A mobile-friendly WebGL visual synthesizer with 150 shader effects, layer blending, video recording, and instant randomization for creative exploration.
 
 ## Features
 
-- **46 Unique Shaders** across 12 categories: Organic, Geometric, Retro, Space, Nature, Psychedelic, Cyber, Light, Audio, Fractal, Energy, Glitch
+- **150 Unique Shaders** across 17 categories: Organic, Geometric, Retro, Space, Nature, Psychedelic, Cyber, Light, Audio, Fractal, Energy, Glitch, Sacred, 3D, Tiling, Flow, Volumetric
 - **Layer System** — Stack multiple visuals with blend modes (add, multiply, screen, normal)
 - **Per-Layer Controls** — Opacity, speed, scale, intensity
 - **🎲 Randomizer** — Instant visualization with randomized shaders and parameters for creative exploration
-- **🎥 Video Recording** — Record 3-60 second videos at 30 FPS in WebM format
+- **🎥 Video Recording** — Camera-style toggle recording at 30 FPS in WebM format with a live elapsed timer
 - **📷 Image Export** — Save high-resolution images at 720p, 1080p, 1440p, 4K, Square (1080×1080), or Portrait (1080×1920)
 - **Mobile-First UI** — Collapsible controls keep visuals unobstructed
 - **Real-time Performance** — Optimized WebGL rendering at 60 FPS
@@ -26,13 +26,13 @@ npm run dev
 - **⏸/▶ Button** — Pause/play animation
 - **🎲 Button** — Randomize all layers instantly (shader, parameters, blend modes)
 - **📷 Button** — Quick save current frame at display resolution
-- **🎥 Button** — Open video duration picker and record (3, 5, 10, 15, 30, or 60 seconds)
+- **🎥 Button** — Tap to start recording immediately; while recording the button turns red and shows a live elapsed timer (⏺ 0:07). Tap again to stop and download the WebM file. Recordings auto-stop at the 5-minute safety cap.
 - **Resolution Button** — Open export settings, choose resolution (720p-4K), save hi-res image
 
 ### Layer Controls
 - **Layer Tabs** — Switch between layers (shows shader name)
 - **+ ADD** — Add a new randomized layer
-- **Shader Dropdown** — Pick from 46 visuals with category filter
+- **Shader Dropdown** — Pick from 150 visuals with a text search and category filter
 - **🎲 Button** — Randomize current layer only
 - **👁 Button** — Toggle layer visibility
 - **✕ Button** — Delete current layer (only if multiple layers exist)
