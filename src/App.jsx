@@ -7,7 +7,8 @@ const SHADERS = [
   // ---- ORIGINAL 40 ----
   { name: 'PLASMA WAVE', category: 'organic', fragment: `precision highp float;uniform float u_time,u_speed,u_scale,u_intensity;uniform vec2 u_resolution;void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=(uv*2.0-1.0)*u_scale;p.x*=u_resolution.x/u_resolution.y;float t=u_time*u_speed;float v=sin(p.x*10.0+t)+sin((p.y*10.0+t)*0.5)+sin((p.x*10.0+p.y*10.0+t)*0.5)+sin(sqrt(p.x*p.x+p.y*p.y)*10.0+t);vec3 col=vec3(sin(v*3.14159+t)*0.5+0.5,sin(v*3.14159+t+2.094)*0.5+0.5,sin(v*3.14159+t+4.188)*0.5+0.5)*u_intensity;gl_FragColor=vec4(col,1.0);}` },
   { name: 'FRACTAL TUNNEL', category: 'geometric', fragment: `precision highp float;uniform float u_time,u_speed,u_scale,u_intensity;uniform vec2 u_resolution;void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=(uv-0.5)*u_scale;p.x*=u_resolution.x/u_resolution.y;float a=atan(p.y,p.x);float r=length(p);float t=u_time*u_speed;float z=fract(1.0/r-t);float spiral=fract(a/6.28318+t*0.1+z*2.0);vec3 col=(0.5+0.5*cos(6.28318*(z+vec3(0.0,0.33,0.67))))*smoothstep(0.0,0.02,abs(spiral-0.5)-0.2)*z*2.0*u_intensity;col+=0.1*vec3(0.3,0.1,0.5)/r;gl_FragColor=vec4(col,1.0);}` },
-  { name: 'NEON GRID', category: 'retro', fragment: `precision highp float;uniform float u_time,u_speed,u_scale,u_intensity;uniform vec2 u_resolution;void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv-0.5;p.x*=u_resolution.x/u_resolution.y;float t=u_time*u_speed;float z=1.0/(1.0-uv.y+0.1);vec2 gp=vec2(p.x*z,z-t*5.0)*u_scale;vec2 g=abs(fract(gp*0.5-0.5)-0.5)/fwidth(gp*0.5);float line=1.0-min(min(g.x,g.y),1.0);vec3 col=vec3(1.0,0.0,0.5)*line*0.5*u_intensity+vec3(0.0,1.0,1.0)*line*smoothstep(0.8,0.2,uv.y)*u_intensity+vec3(0.1,0.0,0.2)*(1.0-uv.y);float sun=smoothstep(0.3,0.28,length(p-vec2(0.0,0.2)));col+=vec3(1.0,0.3,0.1)*sun+vec3(1.0,0.8,0.0)*smoothstep(0.28,0.1,length(p-vec2(0.0,0.2)));gl_FragColor=vec4(col,1.0);}` },
+  { name: 'NEON GRID', category: 'retro', fragment: `#extension GL_OES_standard_derivatives : enable
+precision highp float;uniform float u_time,u_speed,u_scale,u_intensity;uniform vec2 u_resolution;void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv-0.5;p.x*=u_resolution.x/u_resolution.y;float t=u_time*u_speed;float z=1.0/(1.0-uv.y+0.1);vec2 gp=vec2(p.x*z,z-t*5.0)*u_scale;vec2 g=abs(fract(gp*0.5-0.5)-0.5)/fwidth(gp*0.5);float line=1.0-min(min(g.x,g.y),1.0);vec3 col=vec3(1.0,0.0,0.5)*line*0.5*u_intensity+vec3(0.0,1.0,1.0)*line*smoothstep(0.8,0.2,uv.y)*u_intensity+vec3(0.1,0.0,0.2)*(1.0-uv.y);float sun=smoothstep(0.3,0.28,length(p-vec2(0.0,0.2)));col+=vec3(1.0,0.3,0.1)*sun+vec3(1.0,0.8,0.0)*smoothstep(0.28,0.1,length(p-vec2(0.0,0.2)));gl_FragColor=vec4(col,1.0);}` },
   { name: 'LIQUID METAL', category: 'organic', fragment: `precision highp float;uniform float u_time,u_speed,u_scale,u_intensity;uniform vec2 u_resolution;float noise(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}float sn(vec2 p){vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(noise(i),noise(i+vec2(1.0,0.0)),f.x),mix(noise(i+vec2(0.0,1.0)),noise(i+vec2(1.0,1.0)),f.x),f.y);}float fbm(vec2 p){float v=0.0;float a=0.5;for(int i=0;i<6;i++){v+=a*sn(p);p*=2.0;a*=0.5;}return v;}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv*3.0*u_scale;float t=u_time*u_speed;float n=fbm(p+fbm(p+fbm(p+t)));vec3 col=mix(vec3(0.1,0.1,0.3),vec3(0.8,0.8,1.0),n);col=mix(col,vec3(1.0,0.9,0.7),pow(n,3.0));col+=0.3*vec3(0.5,0.7,1.0)*pow(n,5.0);gl_FragColor=vec4(col*u_intensity,1.0);}` },
   { name: 'COSMIC DUST', category: 'space', fragment: `precision highp float;uniform float u_time,u_speed,u_scale,u_intensity;uniform vec2 u_resolution;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float stars(vec2 uv,float t){vec2 gv=fract(uv)-0.5;vec2 id=floor(uv);float star=0.0;for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec2 o=vec2(float(x),float(y));float h=hash(id+o);vec2 p=o+vec2(h,fract(h*34.56))-0.5-gv;star+=smoothstep(0.1*(1.0+0.5*sin(t*(h*5.0+3.0))),0.0,length(p))*h;}return star;}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv-0.5;p.x*=u_resolution.x/u_resolution.y;float t=u_time*u_speed;vec3 col=vec3(0.02,0.01,0.05);col+=vec3(1.0,0.9,0.8)*stars(p*20.0*u_scale+t*0.02,t)*0.5;col+=vec3(0.8,0.9,1.0)*stars(p*40.0*u_scale-t*0.03,t*1.3)*0.3;col+=vec3(0.3,0.1,0.4)*(sin(p.x*3.0+t*0.1)*sin(p.y*2.0-t*0.15)*0.5+0.5)*0.3;gl_FragColor=vec4(col*u_intensity,1.0);}` },
   { name: 'KALEIDOSCOPE', category: 'psychedelic', fragment: `precision highp float;uniform float u_time,u_speed,u_scale,u_intensity;uniform vec2 u_resolution;vec2 kaleid(vec2 uv,float n){float angle=3.14159/n;float a=atan(uv.y,uv.x);a=mod(a,angle*2.0);a=abs(a-angle);return length(uv)*vec2(cos(a),sin(a));}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv-0.5;p.x*=u_resolution.x/u_resolution.y;float t=u_time*u_speed;p=kaleid(p*u_scale,6.0);p=kaleid(p+0.1*sin(t),4.0);vec3 col=vec3(0.0);for(float i=0.0;i<5.0;i++){float fi=i+1.0;vec2 q=p*fi+t*0.5;col.r+=0.2/abs(sin(q.x*10.0+sin(q.y*5.0+t)));col.g+=0.2/abs(sin(q.x*10.0+sin(q.y*5.0+t+1.0)));col.b+=0.2/abs(sin(q.x*10.0+sin(q.y*5.0+t+2.0)));}gl_FragColor=vec4(clamp(pow(col,vec3(1.5))*u_intensity,0.0,1.0),1.0);}` },
@@ -170,18 +171,25 @@ void main(){
   mat4 r1=rot4XW(t*0.7);mat4 r2=rot4YZ(t*0.5);
   vec4 verts[16];
   for(int i=0;i<16;i++){
-    float x=float((i>>0)&1)*2.0-1.0,y=float((i>>1)&1)*2.0-1.0,z=float((i>>2)&1)*2.0-1.0,w=float((i>>3)&1)*2.0-1.0;
+    float fi=float(i);
+    float x=mod(fi,2.0)*2.0-1.0,y=mod(floor(fi/2.0),2.0)*2.0-1.0,z=mod(floor(fi/4.0),2.0)*2.0-1.0,w=mod(floor(fi/8.0),2.0)*2.0-1.0;
     vec4 v=r2*r1*vec4(x,y,z,w)*0.5*u_scale;
     verts[i]=v;
   }
   float d=1e9;
-  for(int a=0;a<16;a++)for(int b=a+1;b<16;b++){
-    int diff=a^b;
-    if(diff==1||diff==2||diff==4||diff==8){
-      vec3 pa=proj4(verts[a],2.5);
-      vec3 pb=proj4(verts[b],2.5);
-      float ld=line3(vec3(uv,0.0),pa,pb);
-      d=min(d,ld);
+  for(int a=0;a<16;a++)for(int b=0;b<16;b++){
+    if(b>a){
+      float fa=float(a),fb=float(b);
+      float dx=abs(mod(fa,2.0)-mod(fb,2.0));
+      float dy=abs(mod(floor(fa/2.0),2.0)-mod(floor(fb/2.0),2.0));
+      float dz=abs(mod(floor(fa/4.0),2.0)-mod(floor(fb/4.0),2.0));
+      float dw=abs(mod(floor(fa/8.0),2.0)-mod(floor(fb/8.0),2.0));
+      if(dx+dy+dz+dw<1.5){
+        vec3 pa=proj4(verts[a],2.5);
+        vec3 pb=proj4(verts[b],2.5);
+        float ld=line3(vec3(uv,0.0),pa,pb);
+        d=min(d,ld);
+      }
     }
   }
   float v=smoothstep(0.04,0.0,d);
@@ -523,9 +531,11 @@ export default function VisualSynthesizer() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [showResolutionPicker, setShowResolutionPicker] = useState(false);
   const [filterCategory, setFilterCategory] = useState('all');
+  const [shaderSearch, setShaderSearch] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [videoDuration, setVideoDuration] = useState(5);
-  const [showVideoDurationPicker, setShowVideoDurationPicker] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const recordingTimerRef = useRef(null);
+  const recordingCapRef = useRef(null);
 
   const categories = ['all', ...new Set(SHADERS.map(s => s.category))];
 
@@ -533,7 +543,7 @@ export default function VisualSynthesizer() {
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) { gl.deleteShader(shader); return null; }
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) { console.error('Shader compile failed:', gl.getShaderInfoLog(shader)); gl.deleteShader(shader); return null; }
     return shader;
   }, []);
 
@@ -550,10 +560,13 @@ export default function VisualSynthesizer() {
   }, [createShader]);
 
   const getOrCreateProgram = useCallback((gl, shaderIndex) => {
-    if (!programsRef.current[shaderIndex]) {
-      programsRef.current[shaderIndex] = createProgram(gl, SHADERS[shaderIndex].fragment);
+    if (programsRef.current[shaderIndex] === undefined) {
+      const program = createProgram(gl, SHADERS[shaderIndex].fragment);
+      if (!program) console.error(`Shader program failed to build: ${SHADERS[shaderIndex].name}`);
+      // cache false on failure so broken shaders don't recompile every frame
+      programsRef.current[shaderIndex] = program || false;
     }
-    return programsRef.current[shaderIndex];
+    return programsRef.current[shaderIndex] || null;
   }, [createProgram]);
 
   const initGL = useCallback(() => {
@@ -561,6 +574,7 @@ export default function VisualSynthesizer() {
     if (!canvas) return;
     const gl = canvas.getContext('webgl', { antialias: true, preserveDrawingBuffer: true, premultipliedAlpha: false });
     if (!gl) return;
+    gl.getExtension('OES_standard_derivatives');
     glRef.current = gl;
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -613,6 +627,27 @@ export default function VisualSynthesizer() {
     return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
   }, []);
 
+  // Dev-only: open with ?verify to compile-check every shader in the library
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('verify')) return;
+    const off = document.createElement('canvas');
+    const gl = off.getContext('webgl');
+    if (!gl) { console.error('[verify] could not create WebGL context'); return; }
+    gl.getExtension('OES_standard_derivatives');
+    let failures = 0;
+    SHADERS.forEach(s => {
+      const fs = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(fs, s.fragment);
+      gl.compileShader(fs);
+      if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+        failures++;
+        console.error(`[verify] ${s.name} failed:`, gl.getShaderInfoLog(fs));
+      }
+      gl.deleteShader(fs);
+    });
+    if (failures === 0) console.log(`All ${SHADERS.length} shaders compiled`);
+  }, []);
+
   const saveImage = useCallback(() => {
     renderFrame(layers, true);
     const canvas = canvasRef.current;
@@ -635,6 +670,7 @@ export default function VisualSynthesizer() {
     off.width = resolution.width; off.height = resolution.height;
     const gl = off.getContext('webgl', { preserveDrawingBuffer: true, premultipliedAlpha: false });
     if (!gl) return;
+    gl.getExtension('OES_standard_derivatives');
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
@@ -674,6 +710,15 @@ export default function VisualSynthesizer() {
     }, 'image/png');
   }, [layers, resolution, createProgram]);
 
+  const clearRecordingTimers = useCallback(() => {
+    if (recordingTimerRef.current) { clearInterval(recordingTimerRef.current); recordingTimerRef.current = null; }
+    if (recordingCapRef.current) { clearTimeout(recordingCapRef.current); recordingCapRef.current = null; }
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
+  }, []);
+
   const startRecording = useCallback(() => {
     const canvas = canvasRef.current; if (!canvas) return;
     try {
@@ -684,21 +729,30 @@ export default function VisualSynthesizer() {
       recordedChunksRef.current = [];
       mr.ondataavailable = e => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
       mr.onstop = () => {
+        clearRecordingTimers();
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.download = `prism-video-${Date.now()}.webm`; a.href = url;
         document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        recordedChunksRef.current = [];
         setIsRecording(false);
+        setRecordingSeconds(0);
+      };
+      // e.g. tab backgrounded mid-recording: drop the recording and reset
+      mr.onerror = () => {
+        clearRecordingTimers();
+        recordedChunksRef.current = [];
+        setIsRecording(false);
+        setRecordingSeconds(0);
       };
       mr.start();
       setIsRecording(true);
-      setTimeout(() => { if (mediaRecorderRef.current?.state === 'recording') stopRecording(); }, videoDuration * 1000);
+      setRecordingSeconds(0);
+      recordingTimerRef.current = setInterval(() => setRecordingSeconds(s => s + 1), 1000);
+      // safety net: hard cap at 5 minutes so a forgotten recording can't eat memory
+      recordingCapRef.current = setTimeout(stopRecording, 5 * 60 * 1000);
     } catch(e) { alert('Recording failed: ' + e.message); }
-  }, [videoDuration]);
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current?.state === 'recording') mediaRecorderRef.current.stop();
-  }, []);
+  }, [clearRecordingTimers, stopRecording]);
 
   const randomizeLayer = useCallback((index) => {
     const rnd = (a, b) => a + Math.random() * (b - a);
@@ -739,7 +793,10 @@ export default function VisualSynthesizer() {
   };
 
   const currentLayer = layers[selectedLayer] || layers[0];
-  const filteredShaders = filterCategory === 'all' ? SHADERS : SHADERS.filter(s => s.category === filterCategory);
+  const filteredShaders = SHADERS.filter(s =>
+    (filterCategory === 'all' || s.category === filterCategory) &&
+    s.name.toLowerCase().includes(shaderSearch.trim().toLowerCase())
+  );
 
   const topBarStyle = { position: 'fixed', top: 0, left: 0, right: 0, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(rgba(0,0,0,0.8), transparent)', transition: 'opacity 0.3s', opacity: showControls ? 1 : 0, pointerEvents: showControls ? 'auto' : 'none' };
   const btnStyle = { background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 8, padding: '8px 12px', color: '#fff', fontSize: 12, cursor: 'pointer' };
@@ -756,7 +813,7 @@ export default function VisualSynthesizer() {
           <button onClick={() => setIsPlaying(p => !p)} style={btnStyle}>{isPlaying ? '⏸' : '▶'}</button>
           <button onClick={randomizeAll} style={{ ...btnStyle, background: 'rgba(255,200,100,0.25)', color: '#ffd' }}>🎲 all</button>
           <button onClick={saveImage} style={btnStyle}>📷</button>
-          <button onClick={() => isRecording ? stopRecording() : setShowVideoDurationPicker(true)} style={{ ...btnStyle, background: isRecording ? 'rgba(255,60,60,0.35)' : 'rgba(255,255,255,0.15)' }}>{isRecording ? '⏹ stop' : '🎥'}</button>
+          <button onClick={() => isRecording ? stopRecording() : startRecording()} style={{ ...btnStyle, background: isRecording ? 'rgba(255,60,60,0.35)' : 'rgba(255,255,255,0.15)', color: isRecording ? '#f88' : '#fff', fontVariantNumeric: 'tabular-nums' }}>{isRecording ? `⏺ ${Math.floor(recordingSeconds / 60)}:${String(recordingSeconds % 60).padStart(2, '0')}` : '🎥'}</button>
           <button onClick={() => setShowResolutionPicker(true)} style={btnStyle}>{resolution.name}</button>
         </div>
       </div>
@@ -816,6 +873,13 @@ export default function VisualSynthesizer() {
               <span style={{ color: '#fff', fontSize: 16, fontWeight: 600 }}>Select Visual</span>
               <button onClick={() => setShowShaderPicker(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 24, cursor: 'pointer', lineHeight: 1 }}>✕</button>
             </div>
+            <input
+              type="search"
+              placeholder="Search shaders…"
+              value={shaderSearch}
+              onChange={e => setShaderSearch(e.target.value)}
+              style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '10px 14px', color: '#fff', fontSize: 13, outline: 'none', marginBottom: 12 }}
+            />
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
               {categories.map(cat => (
                 <button key={cat} onClick={() => setFilterCategory(cat)} style={{ background: filterCategory === cat ? 'rgba(198,120,255,0.35)' : 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 6, padding: '5px 11px', color: '#fff', fontSize: 11, cursor: 'pointer', textTransform: 'capitalize' }}>{cat}</button>
@@ -855,21 +919,6 @@ export default function VisualSynthesizer() {
         </div>
       )}
 
-      {/* Video Duration Picker */}
-      {showVideoDurationPicker && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.95)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 16, padding: 24, width: 260 }}>
-            <div style={{ color: '#fff', fontSize: 15, fontWeight: 600, marginBottom: 14, textAlign: 'center' }}>Video Duration</div>
-            <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
-              {[3, 5, 10, 15, 30, 60].map(dur => (
-                <button key={dur} onClick={() => setVideoDuration(dur)} style={{ background: videoDuration === dur ? 'rgba(255,80,80,0.3)' : 'rgba(255,255,255,0.08)', border: videoDuration === dur ? '1px solid rgba(255,80,80,0.5)' : '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '10px 14px', color: '#fff', cursor: 'pointer', textAlign: 'left', fontSize: 13 }}>{dur} seconds</button>
-              ))}
-            </div>
-            <button onClick={() => { startRecording(); setShowVideoDurationPicker(false); }} style={{ width: '100%', background: 'linear-gradient(135deg, #f44, #f84)', border: 'none', borderRadius: 8, padding: 13, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', marginBottom: 8 }}>🎥 Record {videoDuration}s</button>
-            <button onClick={() => setShowVideoDurationPicker(false)} style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, padding: 11, color: '#aaa', fontSize: 12, cursor: 'pointer' }}>Cancel</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
